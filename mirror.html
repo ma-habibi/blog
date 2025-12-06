@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mahdi Habibi's Blog</title>
+</head>
+<body>
+    <header style="padding: .75em;">
+        <h1>Mirroring reposetories</h1>
+        <nav>
+            <ul>
+                <li><a href="./index.html">Home</a></li>
+                <li><a href="mailto:em.habibi@hotmail.com">Contact</a></li>
+                <li><a href="https://github.com/ma-habibi">Github</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <canvas style="z-index=-1;"></canvas>
+    <main style="padding: .75em;">
+        <div>
+            <h3>
+                Mirror an exsiting GitHub project to a GitLab project
+            </h3>
+            <p>
+                Within its <a href="https://docs.gitlab.com/user/project/repository/mirror/">
+                  repository mirroring
+                </a>, GitLab offers a mirroring method called
+                <a href="https://docs.gitlab.com/user/project/repository/mirror/push/">
+                  push mirrorring
+                </a>. This method can be used to <b>move the development of an
+                  existing GitHub project to GitLab</b> to use GitLab's CI/CD and project
+                features, while the repository still exists on GitHub.
+                After the mirroring is set, the development will take place in GitLab and the GitHub project 
+                will passively receive copies of the branches and commits made to GitLab's project.
+            </p>
+            <h3>
+                Import the project as a new GitLab project
+            </h3>
+            <p>
+                In this example, the GitHub project <code>Elephant</code> exists within the GitHub
+                organization <code>ElephantOrg</code>. To import the existing GitHub project at
+                <code>https://github.com/ElephantOrg-org/Elephant</code> to GitLab, first go to GitLab and create a group
+                called <code>ElephantGroup</code>. Then, navigate to <code>https://gitlab.com/ElephantGroup</code>
+                and create a new project. Choose the <b>Run CI/CD for external repository option.</b>
+                Set <code>Git repository URL </code>to <code>https://github.com/ElephantOrg-org/Elephant</code>. and if
+                the GitHub repository is private, set <code>Username </code> to <code> GITHUB_USERNAME </code> and
+                <code>Password </code> to <code> GITHUB_TOKEN </code>. Set project name (Elephant-lab) and visibility
+                level, and click on submit.
+            </p>
+            <h3>
+                Set up a mirroring repository
+            </h3>
+            <p>
+                Once the project is created, navigate to the project page at
+                <code>https://gitlab.com/ElephantGroup/Elephant-lab</code>, go to <code>settings/Repository/Mirroring repositories</code>
+                and add a new mirror repository, set <code>Mirror direction</code> to <code>push</code> and fill the rest of the form
+                like the previous form. Now the mirror downstream is created successfully.
+            </p>
+            <h3>
+                The Mirroring
+            </h3>
+            <p>
+                Create the first GitLab issue with the title: <code>Create CI/CD and mirroring</code>. Set the issue description to:
+                <ul>
+                    <li>
+                        Create .gitlab-ci.yml.
+                    </li>
+                    <li>
+                        Create pyproject.toml.
+                    </li>
+                    <li>
+                        Set up GitLab's CodeQuality.
+                    </li>
+                </ul>
+                Create a merge request and branch <code>1-create-ci-cd-and-mirroring</code> to close this issue.
+                To this new branch, push a <code>.gitlab-ci.yml</code> file containig:
+                <!-- HTML generated using hilite.me -->
+                <div style="background: #262220; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #DDD0C0">build</span><span style="color: #878787">-</span><span style="color: #DDD0C0">job:</span>
+    <span style="color: #DDD0C0">stage:</span> <span style="color: #DDD0C0">build</span>
+    <span style="color: #DDD0C0">script:</span>
+    <span style="color: #878787">-</span> <span style="color: #DDD0C0">echo</span> <span style="color: #C9B98F">&quot;Hello, $GITLAB_USER_LOGIN!&quot;</span></pre></div>
+                Now the branch <code>https://github.com/ElephantOrg-org/Elephant/tree/1-create-ci-cd-and-mirroring</code> is automatically created!
+                Next blog post will explore the use cases of this workflow by setting up a GitLab CI for a Python project.
+            </p>
+        </div>
+    </main>
+        
+    <script>
+      // Initialize canvas
+      let canvas = document.querySelector("canvas");
+      let ctx = canvas.getContext("2d");
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+      
+      // Map class
+      class Map {
+          constructor(w, h) {
+              this.width = w;
+              this.height = h;
+              this.initAnimation();
+          }
+      
+          initAnimation() {
+              // Initialize variables
+              this.maxSpiral = this.height / 1000.0;
+              this.dt = 0.005; // Step: tf - ti
+              this.amp = 1.0;
+              this.rotate = false;
+              this.rotated = 0.0;
+              this.resizeDir = false;
+              this.dResize = 1.0;
+              this.dRotate = 0.005;
+              this.minResize = this.height / 1000.0;
+              this.maxResize = this.height;
+          }
+      
+          putNextFrameVars() {
+              // Stop rotation, start resize
+              if (this.rotated >= Math.PI)
+                  this.rotate = false;
+      
+              if (this.rotate) {
+                  this.rotated += this.dRotate; // Rotate
+              } else {
+                  // Resize
+                  this.maxSpiral += (this.resizeDir) ? this.dResize : -this.dResize;
+      
+                  // Set direction
+                  if (this.maxSpiral >= this.maxResize) {
+                      this.resizeDir = false;
+                      this.rotated = 0.0;
+                      this.rotate = true;
+                  }
+                  if (this.maxSpiral <= this.minResize) {
+                      this.resizeDir = true;
+                  }
+              }
+          }
+      
+          drawMap(ctx) {
+              let t, x_offset, y_offset;
+      
+              // Get the spiral in the middle
+              x_offset = this.width / 2.0;
+              y_offset = this.height / 2.0;
+      
+              // Update animation variables
+              this.putNextFrameVars();
+      
+              // Clear canvas with a fade effect
+              ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+              ctx.fillRect(0, 0, this.width, this.height);
+      
+              // Set drawing color
+              ctx.fillStyle = "#133700";
+      
+              // Draw spiral
+              for (t = 0.0; t < this.maxSpiral; t += this.dt) {
+                  ctx.fillRect(
+                      x_offset + this.amp * (t * Math.cos(t + this.rotated)),
+                      y_offset + this.amp * (t * Math.sin(t)),
+                      2, 2
+                  );
+              }
+          }
+      }
+      
+      // Create map object
+      let map = new Map(width, height);
+      
+      function animate() {
+          // Redraw the spiral in the next frame
+          map.drawMap(ctx);
+          requestAnimationFrame(animate);
+      }
+      
+      // Start animation loop
+      animate();
+      
+      // Reload on window resize
+      if (!window.matchMedia("(max-width: 768px)").matches)
+        window.addEventListener("resize", () => location.reload());
+
+    </script>
+
+    <footer>
+    <p>Animations you see in this website are 2d visualizations of simple equations using JS canvas. 2025 - Good Mahdi Habibi.</p>
+    </footer>
+
+</body>
+</html>
