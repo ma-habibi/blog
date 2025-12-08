@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mahdi Habibi's Tech Blog</title>
+</head>
+<body>
+    <header style="padding: .75em;">
+        <h1>Hello GLFW - Setting up GLFW on MacOS, Linux, Windows and more</h1>
+        <nav>
+            <ul>
+                <li><a href="./index.html">Home</a></li>
+                <li><a href="#address">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+    <canvas style="z-index=-1;"></canvas>
+    <main style="padding: .75em;">
+        <div>
+            <h3>
+              Git Submodules
+            </h3>
+            <p>
+              I remember having so much trouble when I tried to build a GLFW project on my M1 mac for the first time.
+              The easiest, most reliable cross platform way to build a GLFW project is via 
+              <a href="https://git-scm.com/book/en/v2/Git-Tools-Submodules">Git submodules tool</a>
+              . A tool that allows using other projects from GitHub within a project.
+              This blog post outlines the step by step guide to building GLFW project usning CMake, git and GitHub.
+              GLFW is used as an example but the same approach could be used to import any other library on GitHub.
+            </p>
+            <h3>
+              Initialize a git repository
+            </h3>
+            <p>
+            </p>
+        </div>
+    </main>
+        
+    <script>
+      // Initialize canvas
+      let canvas = document.querySelector("canvas");
+      let ctx = canvas.getContext("2d");
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+      
+      // Map class
+      class Map {
+          constructor(w, h) {
+              this.width = w;
+              this.height = h;
+              this.initAnimation();
+          }
+      
+          initAnimation() {
+              // Initialize variables
+              this.maxSpiral = this.height / 1000.0;
+              this.dt = 0.005; // Step: tf - ti
+              this.amp = 1.0;
+              this.rotate = false;
+              this.rotated = 0.0;
+              this.resizeDir = false;
+              this.dResize = 1.0;
+              this.dRotate = 0.005;
+              this.minResize = this.height / 1000.0;
+              this.maxResize = this.height;
+          }
+      
+          putNextFrameVars() {
+              // Stop rotation, start resize
+              if (this.rotated >= Math.PI)
+                  this.rotate = false;
+      
+              if (this.rotate) {
+                  this.rotated += this.dRotate; // Rotate
+              } else {
+                  // Resize
+                  this.maxSpiral += (this.resizeDir) ? this.dResize : -this.dResize;
+      
+                  // Set direction
+                  if (this.maxSpiral >= this.maxResize) {
+                      this.resizeDir = false;
+                      this.rotated = 0.0;
+                      this.rotate = true;
+                  }
+                  if (this.maxSpiral <= this.minResize) {
+                      this.resizeDir = true;
+                  }
+              }
+          }
+      
+          drawMap(ctx) {
+              let t, x_offset, y_offset;
+      
+              // Get the spiral in the middle
+              x_offset = this.width / 2.0;
+              y_offset = this.height / 2.0;
+      
+              // Update animation variables
+              this.putNextFrameVars();
+      
+              // Clear canvas with a fade effect
+              ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+              ctx.fillRect(0, 0, this.width, this.height);
+      
+              // Set drawing color
+              ctx.fillStyle = "#133700";
+      
+              // Draw spiral
+              for (t = 0.0; t < this.maxSpiral; t += this.dt) {
+                  ctx.fillRect(
+                      x_offset + this.amp * (t * Math.cos(t + this.rotated)),
+                      y_offset + this.amp * (t * Math.sin(t)),
+                      2, 2
+                  );
+              }
+          }
+      }
+      
+      // Create map object
+      let map = new Map(width, height);
+      
+      function animate() {
+          // Redraw the spiral in the next frame
+          map.drawMap(ctx);
+          requestAnimationFrame(animate);
+      }
+      
+      // Start animation loop
+      animate();
+      
+      // Reload on window resize
+      if (!window.matchMedia("(max-width: 768px)").matches)
+        window.addEventListener("resize", () => location.reload());
+
+    </script>
+    <footer>
+    <hr>
+    <address id="address">
+      Email me at <a href="mailto:em.habibi@hotmail.com">em.habibi@hotmail.com</a>.<br />
+      Feel free to visit my <a href="https://github.com/ma-habibi">My GitHub Profile</a><br />
+      or check out my <a href="https://www.linkedin.com/in/mahdihabibilink/">My Linkedin profile</a>.<br />
+      <p>
+      Animations that you see in this website are 2d visualizations of simple equations using JS canvas.<br />
+      2025 - Mahdi Habibi
+      </p>
+    </address>
+    </footer>
+
+</body>
+</html>
