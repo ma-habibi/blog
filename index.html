@@ -7,16 +7,28 @@
 </head>
 <body>
     <header style="padding: .75em;">
-        <h1>Mahdi Habibi's Tech Blog</h1>
         <nav>
             <ul>
-                <li><a href="./index.html">Home</a></li>
                 <li><a href="#address">Contact</a></li>
             </ul>
         </nav>
+        <h1>Mahdi Habibi's Tech Blog</h1>
     </header>
+          <h2>Animations</h2>
+              <p>
+              Animations that you see in this page are visualizations of some simple mathematics
+              done using JavaScript's <a href="https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial">Canvas API.</a>
+              I've also implemented these animations in C++ using SDL2, and the source code for that can be found <a href="https://github.com/ma-habibi/Animation">here.</a>
+              </p>
 
-    <canvas style="z-index=-1;"></canvas>
+              <h4>The Random Sinusoid (Wobbling Ghosts):</h4>
+              <canvas id="sinCanvas"></canvas>
+              <h4>The Road:</h4>
+              <canvas id="roadCanvas"></canvas>
+              <h4>The 3D Rotating Cube:</h4>
+              <canvas id="cubeCanvas"></canvas>
+              <h4>The Euler's Don't Stare:</h4>
+              <canvas id="eulerCanvas"></canvas>
 
     <main class="container my-5 text-white">
         <div style="display: grid; padding: .75em">
@@ -41,110 +53,427 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </main>
-        <script>
-          // set up canvas
-          let canvas = document.querySelector("canvas");
-          let ctx = canvas.getContext("2d");
-          let width = canvas.width = window.innerWidth;
-          let height = canvas.height = window.innerHeight;
-          
-          // Set up amplitude range
-          const MIN_AMP = 100;
-          const MAX_AMP = 200;
-          function randAmp() {
-            return (100 + (Math.random() * 200));
-          }
-          
-          // Set up phase shift (theta) range
-          const MAX_SHIFT = 180;
-          function randShift() {
-            return Math.random() * MAX_SHIFT;
-          }
-          
-          let sins = [
-            {
-              "f": 0.001,
-              "C": randAmp()/2,
-              "theta": randShift(),
-            },
-            {
-              "f": Math.random() * 100,
-              "C": randAmp(),
-              "theta": randShift(),
-            },
-            {
-              "f": Math.random() / 100,
-              "C": randAmp(),
-              "theta": randShift(),
-            },
-          ]
-          
-          let inc;
-          // max and min frequency
-          const MIN_FREQ = 0.0009
-          const MAX_FREQ = 0.05
-          
-          /* change frequency while keep normilize */
-          function updateFrequencies() {
-            
-            // keep normalize
-            for (let i = 0; i < sins.length; i++) {
-              if (sins[i].f >= MAX_FREQ)
-                inc = false;
-              if (sins[i].f < MIN_FREQ)
-                inc = true;
-              // change
-              sins[i].f += inc? (0.00001): (-0.00001);
-            }
-          }
-          
-          const draw = () => {
-            // clear and set
-            ctx.fillStyle = "rgba(0,0,0,0.05)";
-            ctx.fillRect(0, 0, width, height);
-            ctx.fillStyle = "#0000FF";
-          
-            updateFrequencies()
-          
-            // evaluate and draw each pixel (1on1 rect)
-            for (let t = 1.0; t < 2000; t += 0.1) {
-              j = 1.0;
-              for (let i = 0; i < sins.length; i++) {
-                j += sins[i].C * Math.sin(
-                  2.0 * Math.PI * (sins[i].f * t)) + sins[i].theta
-              }
-          
-              // draw
-              ctx.fillRect(t, height/2 + j, 1, 1);
-            }
-          
-          }
-          
-          function main() {
-              inc = true;
-              y = height/2;
-              console.log(sins)
-          
-              setInterval(draw, 20);
+          </div>
+      </main>
 
-              if (!window.matchMedia("(max-width: 768px)").matches)
-                  window.addEventListener("resize", () => location.reload());
+        <script>
+          function runSin() {
+            // set up canvas
+            let canvas = document.getElementById("sinCanvas");
+            let ctx = canvas.getContext("2d");
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+            
+            // Set up amplitude range
+            const MIN_AMP = 256;
+            const MAX_AMP = canvas.height;
+            function randAmp() {
+              return ((Math.random() * MAX_AMP));
+            }
+            
+            // Set up phase shift (theta) range
+            const MAX_SHIFT = 8.0;
+            function randShift() {
+              return Math.random() * MAX_SHIFT;
+            }
+            
+            random_freq = Math.random() / 32.0
+            
+            let sins = [
+              {
+                "f": random_freq,
+                "C": randAmp(),
+                "theta": 32.0
+              },
+              {
+                "f": random_freq / 128.0,
+                "C": randAmp(),
+                "theta": 0.0 //16.0
+              },
+              {
+                "f": random_freq / 16.0,
+                "C": randAmp(),
+                "theta": 0.0 //16.0
+              },
+            ]
+            
+            let inc;
+            // max and min frequency
+            const MIN_FREQ = 0.0009
+            const MAX_FREQ = 0.05
+            
+            /* change frequency while keep normilize */
+            function updateFrequencies() {
+              
+              // keep normalize
+              for (let i = 2; i < sins.length; i++) {
+                if (sins[i].f >= MAX_FREQ)
+                  inc = false;
+                if (sins[i].f < MIN_FREQ)
+                  inc = true;
+                // change
+                let amount = sins[i].f / 512.0
+                sins[i].f += inc? (amount): (-amount);
+              }
+            }
+            
+            const draw = () => {
+              // clear and set
+              ctx.fillStyle = "rgba(0,0,0,0.5)";
+              ctx.fillRect(0, 0, width, height);
+              ctx.fillStyle = "#AABBFF";
+            
+              updateFrequencies()
+            
+              // evaluate and draw each pixel (1on1 rect)
+              for (let t = 1.0; t < 2000; t += 0.1) {
+                j = 1.0;
+                for (let i = 0; i < sins.length; i++) {
+                  j += sins[i].C * Math.sin(
+                    2.0 * Math.PI * (sins[i].f * t)) + sins[i].theta
+                }
+            
+                // draw
+                ctx.fillRect(t, height/2 + j, 3, 3);
+              }
+            
+            }
+            
+            function main() {
+                inc = true;
+                y = height/2;
+                console.log(sins)
+            
+                setInterval(draw, 10);
+
+                if (!window.matchMedia("(max-width: 768px)").matches)
+                    window.addEventListener("resize", () => location.reload());
+            }
+            
+            main()
           }
-          
-          main()
         </script>
+
+        <script>
+          function runRoad() {
+            let canvas = document.getElementById("roadCanvas");
+            let ctx = canvas.getContext("2d");
+            
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+            
+            // ---- DATA ----
+            let vect_horizontal_points = [];
+            let number_of_lines = 100;
+            let first_line_y_pos;
+            
+            // ---- INIT (C++ init) ----
+            function init() {
+              vect_horizontal_points = [];
+              first_line_y_pos = height;
+            
+              let y_pos = first_line_y_pos;
+            
+              for (let i = 0; i < number_of_lines; i++) {
+                vect_horizontal_points.push({ x: 0, y: y_pos });
+                vect_horizontal_points.push({ x: width, y: y_pos });
+            
+                y_pos -= y_pos / 5;
+              }
+            }
+            
+            // ---- UPDATE (C++ update) ----
+            function update() {
+              if (first_line_y_pos >= height) {
+                // shift_left by 2 (remove first line pair)
+                vect_horizontal_points.splice(0, 2);
+            
+                // add new line at end
+                vect_horizontal_points.push({ x: 0, y: height - 50 });
+                vect_horizontal_points.push({ x: width, y: height - 50 });
+            
+                first_line_y_pos = vect_horizontal_points[0].y;
+              }
+            
+              first_line_y_pos += (height / 256);
+            
+              let y_pos = first_line_y_pos;
+            
+              for (let i = 0; i < number_of_lines * 2;) {
+                vect_horizontal_points[i++].y = y_pos;
+                vect_horizontal_points[i++].y = y_pos;
+            
+                y_pos -= y_pos / (height / 256);
+              }
+            }
+            
+            // ---- DRAW (C++ draw) ----
+            function draw() {
+              // fade effect
+              ctx.fillStyle = "rgba(0,0,0,0.1)";
+              ctx.fillRect(0, 0, width, height);
+  
+              ctx.strokeStyle = "rgb(128, 25, 128, 0.3)";
+              ctx.lineWidth = 3;
+            
+              // horizontal lines
+              for (let i = 0; i < number_of_lines * 2 - 1; i += 2) {
+                let p1 = vect_horizontal_points[i];
+                let p2 = vect_horizontal_points[i + 1];
+            
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+              }
+            
+              // vanishing point ("god")
+              let god = { x: width / 2, y: -height / 8.0};
+            
+              // vertical perspective lines
+              for (let i = -32; i < 32; i += 1 / 4) {
+                ctx.strokeStyle = "rgb(128, 25, 128, 0.1)";
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(width * i, height);
+                ctx.lineTo(god.x, god.y);
+                ctx.stroke();
+              }
+            
+              update();
+            }
+            
+            // ---- LOOP ----
+            function animate() {
+              draw();
+              requestAnimationFrame(animate);
+            }
+            
+            // ---- START ----
+            init();
+            animate();
+          }
+        </script>
+
+        <script>
+          function runCube() {
+            const BACKGROUND = "#101010"
+            const FOREGROUND = "#50FF50"
+
+            let canvas = document.getElementById("cubeCanvas");
+            
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+            
+            const ctx = canvas.getContext("2d")
+            
+            function clear() {
+              ctx.fillStyle = BACKGROUND
+              ctx.fillRect(0, 0, canvas.width, canvas.height)
+            }
+            
+            function point({x, y}) {
+              const s = 20;
+              ctx.fillStyle = FOREGROUND
+              ctx.fillRect(x - s/2, y - s/2, s, s)
+            }
+            
+            function screen(p) {
+              return {
+                x: (p.x + 1)/2*canvas.width,
+                y: (1 - (p.y + 1)/2)*canvas.height,
+              }
+            }
+            
+            function project({x, y, z}) {
+              return {
+                x: x/z,
+                y: y/z,
+              }
+            }
+            
+            function translate_z({x, y, z}, dz) {
+              return {x, y, z: z + dz};
+            }
+            
+            function rotate_xz({x, y, z}, angle) {
+              const c = Math.cos(angle);
+              const s = Math.sin(angle);
+              return {
+                x: x*c-z*s,
+                y,
+                z: x*s+z*c,
+              }
+            }
+            
+            function line(p1, p2) {
+              ctx.strokeStyle = FOREGROUND;
+              ctx.beginPath();
+              ctx.moveTo(p1.x, p1.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.stroke();
+            }
+            
+            const FPS = 60;
+            let dz = 1;
+            let angle = 0;
+            
+            function frame() {
+              const dt = 1/FPS;
+              // dz += 1*dt;
+              angle += Math.PI*dt;
+              clear()
+              for (const f of fs) {
+                for (let i = 0; i < f.length; ++i) {
+                  let a = vs[f[i]];
+                  let b = vs[f[(i+1)%f.length]];
+                  line(
+                    screen(project(translate_z(rotate_xz(a, angle), dz))),
+                    screen(project(translate_z(rotate_xz(b, angle), dz)))
+                  )
+                }
+              }
+              setTimeout(frame, 1000 / FPS);
+            }
+            setTimeout(frame, 1000 / FPS);
+            
+            
+            const vs = [
+              {x: +0.25, y: +0.25, z: +0.25},
+              {x: -0.25, y: +0.25, z: +0.25},
+              {x: -0.25, y: -0.25, z: +0.25},
+              {x: +0.25, y: -0.25, z: +0.25},
+            
+              {x: +0.25, y: +0.25, z: -0.25},
+              {x: -0.25, y: +0.25, z: -0.25},
+              {x: -0.25, y: -0.25, z: -0.25},
+              {x: +0.25, y: -0.25, z: -0.25},
+            ]
+            
+            const fs = [
+              [0, 1, 2, 3],
+              [4, 5, 6, 7],
+              [0, 4],
+              [1, 5],
+              [2, 6],
+              [3, 7],
+            ]
+          }
+        
+        </script>
+
+        <script>
+          function runEuler() {
+            // Initialize canvas
+            let canvas = document.getElementById("eulerCanvas");
+            let ctx = canvas.getContext("2d");
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+            
+            // Map class
+            class Map {
+                constructor(w, h) {
+                    this.width = w;
+                    this.height = h;
+                    this.initAnimation();
+                }
+            
+                initAnimation() {
+                    // Initialize variables
+                    this.maxSpiral = this.height / 1000.0;
+                    this.dt = 0.005; // Step: tf - ti
+                    this.amp = 1.0;
+                    this.rotate = false;
+                    this.rotated = 0.0;
+                    this.resizeDir = false;
+                    this.dResize = 1.0;
+                    this.dRotate = 0.005;
+                    this.minResize = this.height / 1000.0;
+                    this.maxResize = this.height;
+                }
+            
+                putNextFrameVars() {
+                    // Stop rotation, start resize
+                    if (this.rotated >= Math.PI)
+                        this.rotate = false;
+            
+                    if (this.rotate) {
+                        this.rotated += this.dRotate; // Rotate
+                    } else {
+                        // Resize
+                        this.maxSpiral += (this.resizeDir) ? this.dResize : -this.dResize;
+            
+                        // Set direction
+                        if (this.maxSpiral >= this.maxResize) {
+                            this.resizeDir = false;
+                            this.rotated = 0.0;
+                            this.rotate = true;
+                        }
+                        if (this.maxSpiral <= this.minResize) {
+                            this.resizeDir = true;
+                        }
+                    }
+                }
+            
+                drawMap(ctx) {
+                    let t, x_offset, y_offset;
+            
+                    // Get the spiral in the middle
+                    x_offset = this.width / 2.0;
+                    y_offset = this.height / 2.0;
+            
+                    // Update animation variables
+                    this.putNextFrameVars();
+            
+                    // Clear canvas with a fade effect
+                    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+                    ctx.fillRect(0, 0, this.width, this.height);
+            
+                    // Set drawing color
+                    ctx.fillStyle = "#AAF";
+            
+                    // Draw spiral
+                    for (t = 0.0; t < this.maxSpiral; t += this.dt) {
+                        ctx.fillRect(
+                            x_offset + this.amp * (t * Math.cos(t + this.rotated)),
+                            y_offset + this.amp * (t * Math.sin(t)),
+                            2, 2
+                        );
+                    }
+                }
+            }
+            
+            // Create map object
+            let map = new Map(width, height);
+            
+            function animate() {
+                // Redraw the spiral in the next frame
+                map.drawMap(ctx);
+                requestAnimationFrame(animate);
+            }
+            
+            // Start animation loop
+            animate();
+            
+            // Reload on window resize
+            if (!window.matchMedia("(max-width: 768px)").matches)
+              window.addEventListener("resize", () => location.reload());
+          }
+        </script>
+
+        <script>
+         runSin()
+         runRoad()
+         runCube()
+         runEuler()
+        </script>
+
         <footer>
         <hr>
         <address id="address">
           Email me at <a href="mailto:em.habibi@hotmail.com">em.habibi@hotmail.com</a>.<br />
           Feel free to visit my <a href="https://github.com/ma-habibi">My GitHub Profile</a><br />
           or check out my <a href="https://www.linkedin.com/in/mahdihabibilink/">My Linkedin profile</a>.<br />
-          <p>
-          Animations that you see in this website are 2d visualizations of simple equations using JS canvas.<br />
-          2025 - Mahdi Habibi
-          </p>
         </address>
         </footer>
 </body>
